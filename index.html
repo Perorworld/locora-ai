@@ -1,103 +1,388 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Locora</title>
-  <style>
-    body { font-family: system-ui, sans-serif; background: #0f1720; color: #e8eef5; margin: 0; }
-    main { max-width: 720px; margin: 0 auto; padding: 24px; }
-    h1 { margin-bottom: 4px; }
-    .sub { color: #8fa3b8; margin-top: 0; margin-bottom: 24px; }
-    .card { background: #17212d; border: 1px solid #263445; border-radius: 10px; padding: 16px; margin-bottom: 14px; }
-    .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-    .card h2 { margin: 0; font-size: 20px; }
-    .badge { font-size: 13px; padding: 3px 10px; border-radius: 999px; background: #33414f; }
-    .Active { background: #1f6f43; }
-    .Paused { background: #8a6d1a; }
-    .Completed { background: #1d4f8a; }
-    .meta { color: #8fa3b8; font-size: 14px; margin: 6px 0 0; }
-    #status { color: #8fa3b8; }
-    .error { color: #ff7b7b; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Locora</title>
+<style>
+:root{--bg:#0f1720;--card:#17212d;--line:#263445;--text:#e8eef5;--muted:#8fa3b8;--accent:#3ea6ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;line-height:1.45}
+header{border-bottom:1px solid var(--line);background:#0b1118;position:sticky;top:0;z-index:5}
+.bar{max-width:980px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.logo{font-weight:800;font-size:20px;color:#fff;text-decoration:none}
+nav a{color:var(--muted);text-decoration:none;margin-right:16px;padding:6px 0;border-bottom:2px solid transparent}
+nav a.on{color:#fff;border-color:var(--accent)}
+.acct{margin-left:auto;font-size:12px;color:var(--muted)}
+.acct button{margin-left:8px}
+main{max-width:980px;margin:0 auto;padding:22px 20px 90px}
+h1{margin:0 0 4px}
+h2{margin:26px 0 10px;font-size:20px}
+h3{margin:0;font-size:18px}
+.sub,.muted{color:var(--muted)}
+.notice{background:#1b2a3a;border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--muted);margin-bottom:18px}
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 18px;min-width:110px}
+.stat b{display:block;font-size:24px}
+.stat span{color:var(--muted);font-size:13px}
+.filters{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.grid{display:grid;gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;display:block;color:inherit;text-decoration:none}
+a.card:hover{border-color:var(--accent)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.meta{color:var(--muted);font-size:14px;margin:6px 0 0}
+.badge{font-size:12px;padding:3px 10px;border-radius:999px;background:#33414f}
+.Active,.Approved,.upheld{background:#1f6f43}
+.Paused,.Pending{background:#8a6d1a}
+.Completed{background:#1d4f8a}
+.Rejected,.dismissed{background:#8a2f2f}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.fact{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.fact small{display:block;color:var(--muted);margin-bottom:2px}
+input,select,textarea,button{font:inherit;color:var(--text);background:#0d141c;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+input,select,textarea{width:100%}
+.filters input,.filters select{width:auto;flex:1;min-width:160px}
+textarea{min-height:60px}
+button{cursor:pointer;background:#1c3a57;border-color:#2b5a85;width:auto}
+button:hover{background:#245076}
+button.small{padding:4px 10px;font-size:13px}
+.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.form label{font-size:13px;color:var(--muted);display:block}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center}
+.actions input{width:110px}
+.hist{margin:0;padding-left:18px}
+.hist li{margin-bottom:6px;color:#cfe0f0}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#0b1118;border:1px solid var(--accent);border-radius:10px;padding:10px 16px;max-width:90%;display:none;z-index:10}
+#toast.err{border-color:#d9534f}
+a.back{color:var(--accent);text-decoration:none}
+</style>
 </head>
 <body>
-  <main>
-    <h1>Locora</h1>
-    <p class="sub">Campaigns that respond to what is happening in the real world.</p>
-    <p id="status">Loading campaigns...</p>
-    <div id="list"></div>
-  </main>
+<header>
+  <div class="bar">
+    <a class="logo" href="#/">Locora</a>
+    <nav id="nav"></nav>
+    <div class="acct" id="acct"></div>
+  </div>
+</header>
+<main id="main"></main>
+<div id="toast"></div>
 
-  <script type="module">
-    import { createClient } from "https://esm.sh/genlayer-js";
-    import { studionet } from "https://esm.sh/genlayer-js/chains";
+<script type="module">
+import * as GL from "https://esm.sh/genlayer-js";
+import { studionet } from "https://esm.sh/genlayer-js/chains";
 
-    const CONTRACT = "0x5D33abF3dA49bEC57D35A4D07e9b12E4A0832cd4";
-    const client = createClient({ chain: studionet });
+const CONTRACT = "0x5D33abF3dA49bEC57D35A4D07e9b12E4A0832cd4";
 
-    // Turns BigInts and Maps from the contract into normal values
-    function plain(v) {
-      if (typeof v === "bigint") return Number(v);
-      if (v instanceof Map) {
-        const o = {};
-        for (const [k, val] of v.entries()) o[k] = plain(val);
-        return o;
-      }
-      if (Array.isArray(v)) return v.map(plain);
-      if (v && typeof v === "object") {
-        const o = {};
-        for (const k of Object.keys(v)) o[k] = plain(v[k]);
-        return o;
-      }
-      return v;
-    }
+/* ---------- test account (stored in this browser only) ---------- */
+function getKey() {
+  let key = localStorage.getItem("locora_key");
+  if (!key) {
+    const b = crypto.getRandomValues(new Uint8Array(32));
+    key = "0x" + Array.from(b, x => x.toString(16).padStart(2, "0")).join("");
+    localStorage.setItem("locora_key", key);
+  }
+  return key;
+}
+const account = GL.createAccount(getKey());
+const client = GL.createClient({ chain: studionet, account });
+const ME = String(account.address).toLowerCase();
 
-    async function read(functionName, args = []) {
-      const result = await client.readContract({
-        address: CONTRACT,
-        functionName,
-        args,
-      });
-      return plain(result);
-    }
+/* ---------- helpers ---------- */
+function plain(v) {
+  if (typeof v === "bigint") return Number(v);
+  if (v instanceof Map) { const o = {}; for (const [k, x] of v.entries()) o[k] = plain(x); return o; }
+  if (Array.isArray(v)) return v.map(plain);
+  if (v && typeof v === "object") { const o = {}; for (const k of Object.keys(v)) o[k] = plain(v[k]); return o; }
+  return v;
+}
+async function read(fn, args = []) {
+  return plain(await client.readContract({ address: CONTRACT, functionName: fn, args }));
+}
+async function write(fn, args) {
+  const call = { address: CONTRACT, functionName: fn, args };
+  let fees;
+  try {
+    const e = await client.estimateTransactionFeesForWrite(call);
+    fees = { distribution: e.distribution, feeValue: e.feeValue };
+  } catch (_) { /* not needed on every network */ }
+  const hash = await client.writeContract(fees ? { ...call, fees } : call);
+  const receipt = await client.waitForTransactionReceipt({
+    hash, status: "ACCEPTED", waitUntil: "decided", retries: 120, interval: 3000,
+  });
+  if (GL.isSuccessful && !GL.isSuccessful(receipt)) {
+    throw new Error("The contract blocked this action (a rule was not met).");
+  }
+  return receipt;
+}
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") e.className = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v);
+  }
+  for (const kid of kids.flat()) {
+    if (kid === null || kid === undefined || kid === false) continue;
+    e.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+  }
+  return e;
+}
+const short = a => a.slice(0, 6) + "…" + a.slice(-4);
+const badge = s => h("span", { class: "badge " + s }, s);
+const fact = (label, value) => h("div", { class: "fact" }, h("small", {}, label), h("div", {}, value));
+function safeLink(url) {
+  return /^https?:\/\//.test(url)
+    ? h("a", { href: url, target: "_blank", rel: "noopener noreferrer", style: "color:#3ea6ff;word-break:break-all" }, url)
+    : url;
+}
+let toastTimer;
+function toast(msg, isErr, sticky) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.className = isErr ? "err" : ""; t.style.display = "block";
+  clearTimeout(toastTimer);
+  if (!sticky) toastTimer = setTimeout(() => (t.style.display = "none"), 6000);
+}
 
-    function el(tag, className, text) {
-      const e = document.createElement(tag);
-      if (className) e.className = className;
-      if (text !== undefined) e.textContent = text;
-      return e;
-    }
+/* ---------- data ---------- */
+const S = { campaigns: [], assist: [], subs: [], parts: [], loaded: false, error: "" };
+let busy = false;
 
-    async function load() {
-      const status = document.getElementById("status");
-      const list = document.getElementById("list");
-      try {
-        const count = await read("get_campaign_count");
-        if (count === 0) {
-          status.textContent = "No campaigns yet.";
-          return;
-        }
-        status.textContent = "";
-        for (let i = 0; i < count; i++) {
-          const c = await read("get_campaign", [i]);
-          const card = el("div", "card");
-          const row = el("div", "row");
-          row.appendChild(el("h2", "", c.title));
-          row.appendChild(el("span", "badge " + c.status, c.status));
-          card.appendChild(row);
-          card.appendChild(el("p", "meta", c.description));
-          card.appendChild(el("p", "meta", c.location + " · " + c.event_type + " · " + c.start_time + " to " + c.end_time));
-          card.appendChild(el("p", "meta", "Reward pool remaining (simulated): " + c.remaining));
-          list.appendChild(card);
-        }
-      } catch (e) {
-        status.className = "error";
-        status.textContent = "Could not load: " + e;
-      }
-    }
+async function refresh() {
+  try {
+    const [cc, sc, pc] = await Promise.all([
+      read("get_campaign_count"), read("get_submission_count"), read("get_participant_count"),
+    ]);
+    const idx = n => Array.from({ length: n }, (_, i) => i);
+    S.campaigns = await Promise.all(idx(cc).map(i => read("get_campaign", [i]).then(c => ({ id: i, ...c }))));
+    S.assist = await Promise.all(idx(cc).map(i => read("get_assistance", [i])));
+    S.subs = await Promise.all(idx(sc).map(i => read("get_submission", [i]).then(s => ({ id: i, ...s }))));
+    S.parts = await Promise.all(idx(pc).map(i => read("get_participant", [i])));
+    S.error = ""; S.loaded = true;
+  } catch (e) { S.error = String(e.message || e); }
+  render();
+}
 
-    load();
-  </script>
+async function act(label, fn, args) {
+  if (busy) return toast("Please wait for the current action to finish.", true);
+  busy = true;
+  toast(label + " ... waiting for the validators (can take 1 to 3 minutes)", false, true);
+  try { await write(fn, args); toast("Finished: " + label + ". If nothing changed, a rule blocked it."); }
+  catch (e) { toast("Failed: " + (e.shortMessage || e.message || e), true); }
+  busy = false;
+  await refresh();
+}
+
+/* ---------- shared pieces ---------- */
+function campaignCard(c) {
+  return h("a", { class: "card", href: "#/campaign/" + c.id },
+    h("div", { class: "row" }, h("h3", {}, c.title), badge(c.status)),
+    h("p", { class: "muted" }, c.description),
+    h("p", { class: "meta" }, c.location + " · " + c.event_type),
+    h("p", { class: "meta" }, c.start_time + " → " + c.end_time));
+}
+function funding(c, a) {
+  return h("div", { class: "facts" },
+    fact("Creator reward pool (simulated)", "Pool " + c.reward_pool + " · per approved post " + c.reward_per_submission + " · paid " + c.paid_out + " · left " + c.remaining),
+    fact("Community assistance pool (simulated, separate)", "Pool " + a.assistance_pool + " · per claim " + a.assistance_per_claim + " · paid " + a.assistance_paid + " · left " + a.assistance_remaining),
+    fact("Disruption verified", a.disruption_verified ? "Yes" : "No"));
+}
+function pageHead(title, sub) {
+  return [h("h1", {}, title), h("p", { class: "sub" }, sub)];
+}
+const NOTICE = h("div", { class: "notice" },
+  "Prototype on GenLayer Studio. All payments are simulated. Your test account is stored only in this browser. Actions take 1 to 3 minutes because validators check real web pages.");
+
+/* ---------- views ---------- */
+function viewExplore(root) {
+  const n = s => S.campaigns.filter(c => c.status === s).length;
+  const stat = (l, v) => h("div", { class: "stat" }, h("b", {}, v), h("span", {}, l));
+  const search = h("input", { placeholder: "Search by title, place or event type" });
+  const sel = h("select", {}, ["All", "Scheduled", "Active", "Paused", "Completed"].map(s => h("option", {}, s)));
+  const list = h("div", { class: "grid" });
+  function draw() {
+    list.replaceChildren();
+    const q = search.value.toLowerCase(), st = sel.value;
+    const items = S.campaigns.filter(c =>
+      (st === "All" || c.status === st) &&
+      (q === "" || (c.title + " " + c.location + " " + c.event_type + " " + c.description).toLowerCase().includes(q)));
+    if (!items.length) list.append(h("p", { class: "muted" }, "No campaigns match."));
+    items.slice().reverse().forEach(c => list.append(campaignCard(c)));
+  }
+  search.addEventListener("input", draw); sel.addEventListener("change", draw);
+  root.append(...pageHead("Event Explorer", "Campaigns that switch on, pause and settle based on what is happening in the real world."),
+    NOTICE,
+    h("div", { class: "stats" }, stat("Campaigns", S.campaigns.length), stat("Active", n("Active")), stat("Paused", n("Paused")), stat("Completed", n("Completed"))),
+    h("div", { class: "filters" }, search, sel), list);
+  draw();
+}
+
+function viewCampaign(root, id) {
+  const c = S.campaigns[id], a = S.assist[id];
+  if (!c) { root.append(h("p", {}, "Campaign not found.")); return; }
+  const hist = h("ul", { class: "hist" }, h("li", {}, "Loading history..."));
+  read("get_history", [id]).then(items => {
+    hist.replaceChildren(...items.slice().reverse().map(t => h("li", {}, t)));
+  }).catch(() => hist.replaceChildren(h("li", {}, "Could not load history.")));
+  const subs = S.subs.filter(s => s.campaign_id === id);
+  root.append(
+    h("a", { class: "back", href: "#/" }, "← All campaigns"),
+    h("div", { class: "row", style: "margin-top:10px" }, h("h1", {}, c.title), badge(c.status)),
+    h("p", { class: "sub" }, c.description),
+    h("div", { class: "facts" },
+      fact("Where", c.location + " (radius " + c.radius_km + " km)"),
+      fact("Campaign window", c.start_time + " → " + c.end_time),
+      fact("Event type", c.event_type),
+      fact("Evidence source", safeLink(c.evidence_url)),
+      fact("Starts when", c.trigger_condition),
+      fact("Pauses / counts as disruption when", c.pause_condition),
+      fact("Content requirements", c.content_requirements)),
+    h("h2", {}, "Funding"), funding(c, a),
+    h("h2", {}, "Decision history"), hist,
+    h("h2", {}, "Creator submissions (" + subs.length + ")"),
+    subs.length ? h("div", { class: "grid" }, subs.map(s => h("div", { class: "card" },
+      h("div", { class: "row" }, safeLink(s.content_url), badge(s.status)),
+      s.reason && h("p", { class: "meta" }, s.reason),
+      h("p", { class: "meta" }, s.payout_status)))) : h("p", { class: "muted" }, "No submissions yet."));
+}
+
+const FIELDS = [
+  ["title", "Campaign title", "text"], ["description", "Short description", "text"],
+  ["location", "Location / venue", "text"], ["radius_km", "Radius (km)", "number"],
+  ["start_time", "Start (e.g. 2026-12-01 16:00)", "text"], ["end_time", "End (e.g. 2026-12-01 22:00)", "text"],
+  ["event_type", "Event type (weather, concert, match, transport...)", "text"],
+  ["trigger_condition", "Start condition (plain English)", "text"],
+  ["pause_condition", "Pause / disruption condition (plain English)", "text"],
+  ["content_requirements", "Content requirements for creators", "text"],
+  ["reward_per_submission", "Reward per approved post (simulated)", "number"],
+  ["initial_funding", "Creator reward pool (simulated)", "number"],
+  ["assistance_per_claim", "Assistance per claim (simulated)", "number"],
+  ["assistance_funding", "Community assistance pool (simulated)", "number"],
+  ["evidence_url", "Evidence web page (public link)", "text"],
+];
+const EXAMPLE = {
+  title: "Lagos Test Campaign", description: "Test campaign for the prototype", location: "Lagos", radius_km: 5,
+  start_time: "2026-12-01 16:00", end_time: "2026-12-01 22:00", event_type: "general",
+  trigger_condition: "The page states that Lagos is a city in Nigeria", pause_condition: "The page mentions Nigeria",
+  content_requirements: "The content must be about Lagos, Nigeria", reward_per_submission: 100, initial_funding: 150,
+  assistance_per_claim: 50, assistance_funding: 120, evidence_url: "https://en.wikipedia.org/wiki/Lagos",
+};
+
+function viewBrand(root) {
+  const inputs = {};
+  const form = h("div", { class: "form" }, FIELDS.map(([k, label, type]) => {
+    inputs[k] = h("input", { type, placeholder: label });
+    return h("div", {}, h("label", {}, label), inputs[k]);
+  }));
+  const create = () => {
+    const args = FIELDS.map(([k, , type]) => type === "number" ? Number(inputs[k].value) : inputs[k].value.trim());
+    if (FIELDS.some(([k, , type], i) => type === "number" ? Number.isNaN(args[i]) || inputs[k].value === "" : args[i] === ""))
+      return toast("Please fill every field.", true);
+    act("Create campaign", "create_campaign", args);
+  };
+  const fill = () => FIELDS.forEach(([k]) => (inputs[k].value = EXAMPLE[k]));
+
+  const manage = S.campaigns.slice().reverse().map(c => {
+    const a = S.assist[c.id];
+    const amt = h("input", { type: "number", placeholder: "Amount" });
+    const btn = (label, fn, args) => h("button", { class: "small", onclick: () => act(label, fn, args) }, label);
+    const acts = [];
+    if (c.status === "Scheduled") acts.push(btn("Check start condition", "evaluate_trigger", [c.id]));
+    if (c.status === "Active") acts.push(btn("Check pause condition", "evaluate_pause", [c.id]));
+    if (c.status === "Paused") acts.push(btn("Check if it can resume", "evaluate_pause", [c.id]));
+    if ((c.status === "Active" || c.status === "Paused") && !a.disruption_verified) acts.push(btn("Verify disruption", "verify_disruption", [c.id]));
+    if (c.status === "Active" || c.status === "Paused") acts.push(btn("Complete campaign", "complete_campaign", [c.id]));
+    return h("div", { class: "card" },
+      h("div", { class: "row" }, h("h3", {}, h("a", { href: "#/campaign/" + c.id, style: "color:inherit" }, c.title)), badge(c.status)),
+      h("p", { class: "meta" }, "Rewards left " + c.remaining + " · Assistance left " + a.assistance_remaining),
+      h("div", { class: "actions" }, acts),
+      c.status !== "Completed" && h("div", { class: "actions" }, amt,
+        h("button", { class: "small", onclick: () => amt.value ? act("Add reward funding", "fund_campaign", [c.id, Number(amt.value)]) : toast("Enter an amount.", true) }, "Add reward funds"),
+        h("button", { class: "small", onclick: () => amt.value ? act("Add assistance funding", "fund_assistance", [c.id, Number(amt.value)]) : toast("Enter an amount.", true) }, "Add assistance funds")));
+  });
+  root.append(...pageHead("Brand dashboard", "Create event-triggered campaigns and run their checks."), NOTICE,
+    h("h2", {}, "Create a campaign"), form,
+    h("div", { class: "actions" }, h("button", { onclick: create }, "Create campaign"), h("button", { onclick: fill }, "Fill test example")),
+    h("h2", {}, "Manage campaigns"),
+    manage.length ? h("div", { class: "grid" }, manage) : h("p", { class: "muted" }, "No campaigns yet."),
+    h("p", { class: "meta" }, "Prototype note: the contract does not record who owns a campaign yet, so any visitor can run these checks."));
+}
+
+function viewCreator(root) {
+  const active = S.campaigns.filter(c => c.status === "Active");
+  const sel = h("select", {}, active.map(c => h("option", { value: c.id }, c.title)));
+  const url = h("input", { placeholder: "Link to your content (a public web page)" });
+  const submit = () => {
+    if (!active.length) return toast("No active campaigns right now.", true);
+    if (!url.value.trim()) return toast("Paste a link first.", true);
+    act("Submit content", "submit_content", [Number(sel.value), url.value.trim()]);
+  };
+  const mine = S.subs.filter(s => s.creator.toLowerCase() === ME).reverse().map(s => {
+    const c = S.campaigns[s.campaign_id];
+    const note = h("input", { placeholder: "Why was this rejection wrong?" });
+    return h("div", { class: "card" },
+      h("div", { class: "row" }, h("h3", {}, c ? c.title : "Campaign " + s.campaign_id), badge(s.status)),
+      h("p", { class: "meta" }, safeLink(s.content_url)),
+      s.reason && h("p", { class: "meta" }, "Reviewer: " + s.reason),
+      h("p", { class: "meta" }, s.payout_status),
+      s.dispute_status !== "none" && h("p", { class: "meta" }, "Dispute " + s.dispute_status + ": " + s.dispute_result),
+      s.status === "Pending" && h("div", { class: "actions" }, h("button", { class: "small", onclick: () => act("Review submission", "evaluate_submission", [s.id]) }, "Get it reviewed")),
+      s.status === "Rejected" && s.dispute_status === "none" && h("div", { class: "actions" }, note,
+        h("button", { class: "small", onclick: () => note.value.trim() ? act("Dispute rejection", "dispute_submission", [s.id, note.value.trim()]) : toast("Write a short note.", true) }, "Dispute")));
+  });
+  root.append(...pageHead("Creator dashboard", "Submit content to active campaigns and get paid when it meets the requirements."), NOTICE,
+    h("h2", {}, "Submit content"),
+    active.length ? h("div", { class: "form" }, h("div", {}, h("label", {}, "Campaign"), sel), h("div", {}, h("label", {}, "Content link"), url)) : h("p", { class: "muted" }, "No campaigns are active right now."),
+    active.length && h("div", { class: "actions" }, h("button", { onclick: submit }, "Submit")),
+    h("h2", {}, "My submissions"),
+    mine.length ? h("div", { class: "grid" }, mine) : h("p", { class: "muted" }, "You have not submitted anything yet."));
+}
+
+function viewCommunity(root) {
+  const open = S.campaigns.filter(c => c.status !== "Completed").reverse();
+  const cards = open.map(c => {
+    const a = S.assist[c.id];
+    const me = S.parts.find(p => p.campaign_id === c.id && p.wallet.toLowerCase() === ME);
+    let action;
+    if (!me && !a.disruption_verified) action = h("button", { class: "small", onclick: () => act("Register", "register_participant", [c.id]) }, "Register for this campaign");
+    else if (!me) action = h("span", { class: "meta" }, "Registration closed: a disruption was already verified.");
+    else if (me.claimed) action = h("span", { class: "meta" }, me.note);
+    else if (a.disruption_verified) action = h("button", { class: "small", onclick: () => act("Claim assistance", "claim_assistance", [c.id]) }, "Claim assistance");
+    else action = h("span", { class: "meta" }, "You are registered. Assistance opens if a disruption is verified.");
+    return h("div", { class: "card" },
+      h("div", { class: "row" }, h("h3", {}, h("a", { href: "#/campaign/" + c.id, style: "color:inherit" }, c.title)), badge(c.status)),
+      h("p", { class: "meta" }, c.location + " · disruption rule: " + c.pause_condition),
+      h("p", { class: "meta" }, "Assistance per claim " + a.assistance_per_claim + " · left " + a.assistance_remaining + " (simulated, sponsor-funded)"),
+      h("div", { class: "actions" }, action));
+  });
+  root.append(...pageHead("Community protection", "Register before an event. If a disruption is verified, registered people can claim sponsor-funded assistance."), NOTICE,
+    cards.length ? h("div", { class: "grid" }, cards) : h("p", { class: "muted" }, "No open campaigns."));
+}
+
+/* ---------- router ---------- */
+function render() {
+  const route = location.hash.replace(/^#\/?/, "");
+  const parts = route.split("/");
+  const page = parts[0] === "" ? "explore" : parts[0];
+  document.getElementById("nav").replaceChildren(
+    ...[["explore", "#/", "Explore"], ["brand", "#/brand", "Brand"], ["creator", "#/creator", "Creator"], ["community", "#/community", "Community"]]
+      .map(([k, href, label]) => h("a", { href, class: (page === k || (page === "campaign" && k === "explore")) ? "on" : "" }, label)));
+  document.getElementById("acct").replaceChildren(
+    "Test account " + short(String(account.address)),
+    h("button", { class: "small", onclick: () => { if (confirm("Create a new test account? Your current one will be forgotten.")) { localStorage.removeItem("locora_key"); location.reload(); } } }, "New account"));
+  const root = document.getElementById("main");
+  root.replaceChildren();
+  if (S.error) { root.append(h("p", { style: "color:#ff7b7b" }, "Could not load: " + S.error)); return; }
+  if (!S.loaded) { root.append(h("p", { class: "muted" }, "Loading from GenLayer...")); return; }
+  if (page === "campaign") viewCampaign(root, Number(parts[1]));
+  else if (page === "brand") viewBrand(root);
+  else if (page === "creator") viewCreator(root);
+  else if (page === "community") viewCommunity(root);
+  else viewExplore(root);
+}
+window.addEventListener("hashchange", render);
+render();
+refresh();
+</script>
 </body>
 </html>
