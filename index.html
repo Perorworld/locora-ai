@@ -1,257 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Locora: campaigns triggered by real-world events</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Public+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --paper: #edf1f3;
-    --card: #fafcfc;
-    --ink: #0f2a33;
-    --muted: #5a6f77;
-    --line: #c9d4d9;
-    --teal: #0e7c86;
-    --amber: #d98e04;
-    --red: #b3412f;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --paper: #0c1a20;
-      --card: #12262e;
-      --ink: #e6eff2;
-      --muted: #8fa5ad;
-      --line: #25404a;
-      --teal: #3cc1cc;
-      --amber: #f0b23a;
-      --red: #e8806c;
-    }
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; }
-  body {
-    background: var(--paper);
-    color: var(--ink);
-    font-family: "Public Sans", system-ui, sans-serif;
-    line-height: 1.55;
-  }
-  .wrap { max-width: 860px; margin: 0 auto; padding: 40px 20px 80px; }
-  header { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
-  .logo { width: 34px; height: 34px; }
-  h1 {
-    font-family: "Bricolage Grotesque", sans-serif;
-    font-weight: 700;
-    font-size: 1.6rem;
-    margin: 0;
-    letter-spacing: -0.01em;
-  }
-  .lead {
-    font-family: "Bricolage Grotesque", sans-serif;
-    font-weight: 500;
-    font-size: clamp(1.7rem, 5vw, 2.5rem);
-    line-height: 1.15;
-    letter-spacing: -0.02em;
-    margin: 0 0 12px;
-    max-width: 18em;
-  }
-  .sub { color: var(--muted); max-width: 34em; margin: 0 0 28px; }
-  .bar {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 12px; margin-bottom: 16px; padding-bottom: 12px;
-    border-bottom: 1px solid var(--line);
-  }
-  .count { color: var(--muted); font-size: 0.95rem; }
-  button {
-    font: inherit; font-weight: 600; cursor: pointer;
-    background: var(--teal); color: #fff; border: 0;
-    padding: 9px 16px; border-radius: 8px;
-  }
-  button:disabled { opacity: 0.6; cursor: default; }
-  button:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
-  .list { display: grid; gap: 14px; }
-  .item {
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 18px 20px;
-  }
-  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
-  .item h2 {
-    font-family: "Bricolage Grotesque", sans-serif;
-    font-size: 1.2rem; margin: 0; font-weight: 700;
-  }
-  .status {
-    display: inline-flex; align-items: center; gap: 8px;
-    font-size: 0.85rem; font-weight: 600; white-space: nowrap;
-  }
-  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); }
-  .s-active .dot { background: var(--teal); animation: pulse 1.8s ease-out infinite; }
-  .s-paused .dot { background: var(--amber); }
-  .s-completed .dot { background: var(--muted); }
-  .s-failed .dot { background: var(--red); }
-  @keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(14,124,134,0.5); }
-    100% { box-shadow: 0 0 0 10px rgba(14,124,134,0); }
-  }
-  @media (prefers-reduced-motion: reduce) { .s-active .dot { animation: none; } }
-  dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 0; }
-  dt { color: var(--muted); font-size: 0.9rem; }
-  dd { margin: 0; overflow-wrap: anywhere; }
-  .msg { padding: 28px 0; color: var(--muted); }
-  .error {
-    background: var(--card); border: 1px solid var(--red);
-    color: var(--ink); padding: 14px 16px; border-radius: 10px;
-  }
-  footer { margin-top: 36px; color: var(--muted); font-size: 0.85rem; overflow-wrap: anywhere; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Locora</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0f1720; color: #e8eef5; margin: 0; }
+    main { max-width: 720px; margin: 0 auto; padding: 24px; }
+    h1 { margin-bottom: 4px; }
+    .sub { color: #8fa3b8; margin-top: 0; margin-bottom: 24px; }
+    .card { background: #17212d; border: 1px solid #263445; border-radius: 10px; padding: 16px; margin-bottom: 14px; }
+    .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .card h2 { margin: 0; font-size: 20px; }
+    .badge { font-size: 13px; padding: 3px 10px; border-radius: 999px; background: #33414f; }
+    .Active { background: #1f6f43; }
+    .Paused { background: #8a6d1a; }
+    .Completed { background: #1d4f8a; }
+    .meta { color: #8fa3b8; font-size: 14px; margin: 6px 0 0; }
+    #status { color: #8fa3b8; }
+    .error { color: #ff7b7b; }
+  </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <svg class="logo" viewBox="0 0 40 40" aria-hidden="true">
-      <circle cx="20" cy="20" r="18" fill="none" stroke="#0e7c86" stroke-width="3"/>
-      <circle cx="20" cy="20" r="9" fill="none" stroke="#d98e04" stroke-width="3"/>
-      <circle cx="20" cy="20" r="3.5" fill="#0e7c86"/>
-    </svg>
+  <main>
     <h1>Locora</h1>
-  </header>
+    <p class="sub">Campaigns that respond to what is happening in the real world.</p>
+    <p id="status">Loading campaigns...</p>
+    <div id="list"></div>
+  </main>
 
-  <p class="lead">Campaigns that start when something real happens.</p>
-  <p class="sub">Each campaign watches for an event in a place and a time window. When the event is confirmed, the campaign goes live.</p>
+  <script type="module">
+    import { createClient } from "https://esm.sh/genlayer-js";
+    import { studionet } from "https://esm.sh/genlayer-js/chains";
 
-  <div class="bar">
-    <span class="count" id="count">Loading campaigns…</span>
-    <button id="refresh" type="button">Refresh</button>
-  </div>
+    const CONTRACT = "0x5D33abF3dA49bEC57D35A4D07e9b12E4A0832cd4";
+    const client = createClient({ chain: studionet });
 
-  <div class="list" id="list" aria-live="polite"></div>
-
-  <footer>Contract: <span id="addr"></span> on GenLayer Studio</footer>
-</div>
-
-<script type="module">
-  import { createClient } from "https://esm.sh/genlayer-js";
-  import { studionet } from "https://esm.sh/genlayer-js/chains";
-
-  // Latest Locora contract (Stage 5c) on GenLayer Studio
-  const CONTRACT = "0x5D33abF3dA49bEC57D35A4D07e9b12E4A0832cd4";
-  document.getElementById("addr").textContent = CONTRACT;
-
-  const client = createClient({ chain: studionet });
-
-  const listEl = document.getElementById("list");
-  const countEl = document.getElementById("count");
-  const btn = document.getElementById("refresh");
-
-  // Turn whatever the contract returns into plain JavaScript values
-  function norm(v) {
-    if (typeof v === "bigint") return Number(v);
-    if (v instanceof Map) {
-      const o = {};
-      for (const [k, val] of v.entries()) o[String(k)] = norm(val);
-      return o;
-    }
-    if (Array.isArray(v)) return v.map(norm);
-    if (typeof v === "string") {
-      const t = v.trim();
-      if (t.startsWith("{") || t.startsWith("[")) {
-        try { return norm(JSON.parse(t)); } catch (e) {}
+    // Turns BigInts and Maps from the contract into normal values
+    function plain(v) {
+      if (typeof v === "bigint") return Number(v);
+      if (v instanceof Map) {
+        const o = {};
+        for (const [k, val] of v.entries()) o[k] = plain(val);
+        return o;
+      }
+      if (Array.isArray(v)) return v.map(plain);
+      if (v && typeof v === "object") {
+        const o = {};
+        for (const k of Object.keys(v)) o[k] = plain(v[k]);
+        return o;
       }
       return v;
     }
-    if (v && typeof v === "object") {
-      const o = {};
-      for (const k of Object.keys(v)) o[k] = norm(v[k]);
-      return o;
-    }
-    return v;
-  }
 
-  const read = (functionName, args = []) =>
-    client.readContract({ address: CONTRACT, functionName, args });
-
-  function pretty(key) {
-    const s = key.replace(/_/g, " ");
-    return s.charAt(0).toUpperCase() + s.slice(1);
-  }
-
-  function show(val) {
-    if (val === null || val === undefined || val === "") return "Not set";
-    if (typeof val === "object") return JSON.stringify(val);
-    return String(val);
-  }
-
-  function card(c, id) {
-    const data = typeof c === "object" && c !== null ? c : { value: c };
-    const title = data.title || data.name || data.campaign_name || "Campaign " + id;
-    const status = String(data.status || "unknown");
-    const key = status.toLowerCase();
-    const cls = key.includes("active") ? "s-active" : key.includes("pause") ? "s-paused"
-      : key.includes("complete") ? "s-completed" : key.includes("fail") ? "s-failed" : "";
-    const skip = new Set(["title", "name", "campaign_name", "status"]);
-    const rows = Object.keys(data).filter(k => !skip.has(k))
-      .map(k => `<dt></dt><dd></dd>`).join("");
-
-    const el = document.createElement("article");
-    el.className = "item";
-    el.innerHTML = `
-      <div class="top"><h2></h2><span class="status ${cls}"><span class="dot"></span><span class="st"></span></span></div>
-      <dl>${rows}</dl>`;
-    el.querySelector("h2").textContent = title;
-    el.querySelector(".st").textContent = pretty(status);
-    const dts = el.querySelectorAll("dt"), dds = el.querySelectorAll("dd");
-    Object.keys(data).filter(k => !skip.has(k)).forEach((k, i) => {
-      dts[i].textContent = pretty(k);
-      dds[i].textContent = show(data[k]);
-    });
-    return el;
-  }
-
-  async function load() {
-    btn.disabled = true;
-    listEl.innerHTML = "";
-    countEl.textContent = "Loading campaigns…";
-    try {
-      const total = Number(norm(await read("get_campaign_count")));
-      if (!total) {
-        countEl.textContent = "No campaigns yet";
-        listEl.innerHTML = '<p class="msg">No campaigns have been created. Create one in GenLayer Studio and refresh this page.</p>';
-        return;
-      }
-      // Campaign ids may start at 0 or 1, so try 0 first and fall back to 1
-      let start = 0;
-      let results = await Promise.allSettled(
-        Array.from({ length: total }, (_, i) => read("get_campaign", [i + start]))
-      );
-      if (results[0].status === "rejected") {
-        start = 1;
-        results = await Promise.allSettled(
-          Array.from({ length: total }, (_, i) => read("get_campaign", [i + start]))
-        );
-      }
-      let shown = 0;
-      results.forEach((r, i) => {
-        if (r.status === "fulfilled") {
-          listEl.appendChild(card(norm(r.value), i + start));
-          shown++;
-        }
+    async function read(functionName, args = []) {
+      const result = await client.readContract({
+        address: CONTRACT,
+        functionName,
+        args,
       });
-      countEl.textContent = shown + (shown === 1 ? " campaign" : " campaigns");
-      if (!shown) throw new Error("The campaigns could not be read from the contract.");
-    } catch (err) {
-      countEl.textContent = "Could not load";
-      listEl.innerHTML = '<div class="error"></div>';
-      listEl.firstChild.textContent = "Could not reach the contract. Check your internet connection and press Refresh. (" + (err.message || err) + ")";
-    } finally {
-      btn.disabled = false;
+      return plain(result);
     }
-  }
 
-  btn.addEventListener("click", load);
-  load();
-</script>
+    function el(tag, className, text) {
+      const e = document.createElement(tag);
+      if (className) e.className = className;
+      if (text !== undefined) e.textContent = text;
+      return e;
+    }
+
+    async function load() {
+      const status = document.getElementById("status");
+      const list = document.getElementById("list");
+      try {
+        const count = await read("get_campaign_count");
+        if (count === 0) {
+          status.textContent = "No campaigns yet.";
+          return;
+        }
+        status.textContent = "";
+        for (let i = 0; i < count; i++) {
+          const c = await read("get_campaign", [i]);
+          const card = el("div", "card");
+          const row = el("div", "row");
+          row.appendChild(el("h2", "", c.title));
+          row.appendChild(el("span", "badge " + c.status, c.status));
+          card.appendChild(row);
+          card.appendChild(el("p", "meta", c.description));
+          card.appendChild(el("p", "meta", c.location + " · " + c.event_type + " · " + c.start_time + " to " + c.end_time));
+          card.appendChild(el("p", "meta", "Reward pool remaining (simulated): " + c.remaining));
+          list.appendChild(card);
+        }
+      } catch (e) {
+        status.className = "error";
+        status.textContent = "Could not load: " + e;
+      }
+    }
+
+    load();
+  </script>
 </body>
 </html>
