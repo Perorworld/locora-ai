@@ -68,17 +68,21 @@ a.back{color:var(--accent);text-decoration:none}
 
 <script type="module">
 import * as GL from "https://esm.sh/genlayer-js";
-import { testnetBradbury } from "https://esm.sh/genlayer-js/chains";
+import { studionet, testnetBradbury } from "https://esm.sh/genlayer-js/chains";
 
-/* ===== SETTINGS: paste your Bradbury contract address here ===== */
-const CONTRACT = "PASTE_YOUR_BRADBURY_CONTRACT_ADDRESS_HERE";
-const NETWORK_KEY = "testnetBradbury";
+/* ===== SETTINGS ===== */
+// The contract address and the network must match.
+// Studio contract:   NETWORK = "studionet"
+// Bradbury contract: NETWORK = "testnetBradbury"  (and paste the new Bradbury address)
+const CONTRACT = "0x2538d4f6c9C5CE5935889CB4B510D6f2a84f8342";
+const NETWORK = "studionet";
 const RPC_OVERRIDE = ""; // leave empty unless told otherwise
-/* =============================================================== */
+/* ==================== */
 
+const baseChain = NETWORK === "studionet" ? studionet : testnetBradbury;
 const chain = RPC_OVERRIDE
-  ? { ...testnetBradbury, rpcUrls: { default: { http: [RPC_OVERRIDE] } } }
-  : testnetBradbury;
+  ? { ...baseChain, rpcUrls: { default: { http: [RPC_OVERRIDE] } } }
+  : baseChain;
 const readClient = GL.createClient({ chain });
 const WEI = 10n ** 18n;
 
@@ -121,7 +125,7 @@ async function connectWallet(silent) {
     const accounts = await window.ethereum.request({ method: silent ? "eth_accounts" : "eth_requestAccounts" });
     if (!accounts.length) return;
     walletClient = GL.createClient({ chain, account: accounts[0], provider: window.ethereum });
-    await walletClient.connect(NETWORK_KEY);
+    await walletClient.connect(NETWORK);
     ME = accounts[0].toLowerCase();
     await updateBalance();
   } catch (e) {
@@ -196,7 +200,9 @@ function toast(msg, isErr, sticky) {
   if (!sticky) toastTimer = setTimeout(() => (t.style.display = "none"), 7000);
 }
 const NOTICE = h("div", { class: "notice" },
-  "Runs on the GenLayer Bradbury testnet. GEN here is testnet GEN with no market value. Gas and funding are paid in GEN from your own wallet. Validators check real web pages, so actions take 1 to 3 minutes, and payouts arrive once the transaction is finalized.");
+  NETWORK === "studionet"
+    ? "Test mode: this page is connected to GenLayer Studio, a development environment. Data here can be reset. Validators check real web pages, so actions take 1 to 3 minutes."
+    : "Runs on the GenLayer Bradbury testnet. GEN here is testnet GEN with no market value. Gas and funding are paid in GEN from your own wallet. Validators check real web pages, so actions take 1 to 3 minutes, and payouts arrive once the transaction is finalized.");
 
 /* ---------- data ---------- */
 const S = { campaigns: [], assist: [], subs: [], parts: [], loaded: false, error: "" };
@@ -435,7 +441,7 @@ function render() {
   const root = document.getElementById("main");
   root.replaceChildren();
   if (CONTRACT.startsWith("PASTE")) {
-    root.append(h("div", { class: "card" }, h("h3", {}, "Almost ready"), h("p", { class: "muted" }, "Open index.html and paste your deployed Bradbury contract address into the CONTRACT setting near the top of the script.")));
+    root.append(h("div", { class: "card" }, h("h3", {}, "Almost ready"), h("p", { class: "muted" }, "Open index.html and paste your deployed contract address into the CONTRACT setting near the top of the script.")));
     return;
   }
   if (S.error) { root.append(h("p", { style: "color:#ff7b7b" }, "Could not load: " + S.error)); return; }
